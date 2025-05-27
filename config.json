@@ -6,9 +6,9 @@
       "vision_model": "gpt-4o"
     },
     "google": {
-      "default_model": "gemini-2.5-flash-preview-05-20",
-      "fast_model": "gemini-2.5-flash-preview-05-20",
-      "high_model": "gemini-2.5-pro-preview-05-06",
-      "vision_model": "gemini-2.5-pro-preview-05-06"
+      "default_model": "gemini-1.5-flash-latest",
+      "fast_model": "gemini-1.5-flash-latest",
+      "high_model": "gemini-1.5-pro-latest",
+      "vision_model": "gemini-1.5-pro-latest"
     }
   }

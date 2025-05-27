@@ -6,135 +6,189 @@
     <title>AI Hello World</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* For a more professional look, consider Inter font or similar */
-        body { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif; }
+        /* Base body font for a clean, modern look. Tailwind pulls in a system font stack. */
+        body { 
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif; 
+        }
+        /* Spinner animation for loading indication */
         .spinner {
-            border: 4px solid rgba(255, 255, 255, 0.3); /* Lighter border for dark button */
-            width: 20px; /* Slightly smaller spinner */
+            border: 4px solid rgba(255, 255, 255, 0.3); /* Lighter border for contrast on dark buttons */
+            width: 20px; 
             height: 20px;
             border-radius: 50%;
-            border-left-color: #ffffff; /* White spinner on blue button */
+            border-left-color: #ffffff; /* Spinner color */
             animation: spin 1s ease infinite;
         }
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        /* Custom scrollbar for response area if needed */
-        #aiResponse {
-            max-height: 300px;
-            overflow-y: auto;
+        /* Custom scrollbar for the AI response area for better aesthetics */
+        #responseArea { /* Changed from #aiResponse to target the container div */
+            max-height: 300px; /* Max height before scrolling */
+            overflow-y: auto; /* Enable vertical scrollbar when content exceeds max-height */
+            scrollbar-width: thin; /* For Firefox */
+            scrollbar-color: #4a5568 #2d3748; /* scrollbar thumb and track color */
+        }
+        #responseArea::-webkit-scrollbar { /* For Chrome, Safari, Edge */
+            width: 8px;
+        }
+        #responseArea::-webkit-scrollbar-track {
+            background: #2d3748; /* Track color */
+            border-radius: 10px;
+        }
+        #responseArea::-webkit-scrollbar-thumb {
+            background-color: #4a5568; /* Thumb color */
+            border-radius: 10px;
+            border: 2px solid #2d3748; /* Creates padding around thumb */
+        }
+        /* Ensuring form elements are slightly dimmed when disabled for better UX */
+        form:has(button:disabled) {
+            opacity: 0.85; /* Slightly dim the form when processing */
+            transition: opacity 0.3s ease-in-out;
         }
     </style>
 </head>
 <body class="bg-gradient-to-br from-slate-900 to-slate-800 text-gray-100 flex flex-col items-center justify-center min-h-screen p-4 selection:bg-sky-500 selection:text-white">
-    <div class="bg-slate-800/70 backdrop-blur-md p-8 rounded-xl shadow-2xl w-full max-w-2xl border border-slate-700">
-        <h1 class="text-4xl font-bold mb-8 text-center bg-clip-text text-transparent bg-gradient-to-r from-sky-400 via-cyan-400 to-teal-500">
+    <div class="bg-slate-800/70 backdrop-blur-md p-6 sm:p-8 rounded-xl shadow-2xl w-full max-w-2xl border border-slate-700">
+        <h1 class="text-3xl sm:text-4xl font-bold mb-6 sm:mb-8 text-center bg-clip-text text-transparent bg-gradient-to-r from-sky-400 via-cyan-400 to-teal-500">
             AI Multi-Tool
         </h1>
 
         <form id="aiForm" class="space-y-6">
             <div>
                 <label for="provider" class="block text-sm font-medium text-sky-300 mb-1">AI Provider</label>
-                <select id="provider" name="provider" class="mt-1 block w-full p-3 bg-slate-700 border border-slate-600 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500 sm:text-sm text-gray-200 placeholder-gray-400">
-                    <option value="openai">OpenAI (GPT-3.5 Turbo)</option>
-                    <option value="google">Google (Gemini Pro/Vision)</option>
+                <select id="provider" name="provider" aria-label="Select AI Provider" class="mt-1 block w-full p-3 bg-slate-700 border border-slate-600 rounded-md shadow-sm focus:ring-2 focus:ring-sky-500 focus:border-sky-500 sm:text-sm text-gray-200 placeholder-gray-400 transition-colors duration-150 ease-in-out">
+                    <option value="openai">OpenAI (GPT-4o)</option> <!-- Updated model name -->
+                    <option value="google">Google (Gemini 1.5 Flash)</option> <!-- Updated model name -->
                 </select>
             </div>
 
             <div>
                 <label for="userInput" class="block text-sm font-medium text-sky-300 mb-1">Your Prompt</label>
-                <textarea id="userInput" name="userInput" rows="5" class="mt-1 block w-full p-3 bg-slate-700 border border-slate-600 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500 sm:text-sm text-gray-200 placeholder-gray-400" placeholder="Enter your prompt here..."></textarea>
+                <textarea id="userInput" name="userInput" rows="5" aria-label="Enter your prompt" class="mt-1 block w-full p-3 bg-slate-700 border border-slate-600 rounded-md shadow-sm focus:ring-2 focus:ring-sky-500 focus:border-sky-500 sm:text-sm text-gray-200 placeholder-gray-400 transition-colors duration-150 ease-in-out" placeholder="Enter your prompt here... e.g., 'Summarize this text for a tweet.' or 'What is the capital of France?'"></textarea>
             </div>
 
             <div>
                 <label for="fileUpload" class="block text-sm font-medium text-sky-300 mb-1">Upload File (Optional)</label>
-                <input type="file" id="fileUpload" name="fileUpload" class="mt-1 block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-sky-600 file:text-sky-50 hover:file:bg-sky-700 cursor-pointer"/>
+                <input type="file" id="fileUpload" name="fileUpload" aria-label="Upload an optional file" class="mt-1 block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-sky-600 file:text-sky-50 hover:file:bg-sky-700 cursor-pointer transition-colors duration-150 ease-in-out"/>
             </div>
 
-            <button type="submit" id="submitButton" class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-gradient-to-r from-sky-500 to-cyan-500 hover:from-sky-600 hover:to-cyan-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-800 focus:ring-sky-400 transition-all duration-150 ease-in-out">
+            <button type="submit" id="submitButton" class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-gradient-to-r from-sky-500 to-cyan-500 hover:from-sky-600 hover:to-cyan-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-800 focus:ring-sky-400 transition-all duration-150 ease-in-out disabled:opacity-70 disabled:cursor-not-allowed">
                 <span id="submitButtonText">Send Prompt</span>
-                <div id="spinner" class="spinner ml-2 hidden"></div>
+                <div id="spinner" class="spinner ml-2 hidden"></div> <!-- Spinner initially hidden -->
             </button>
         </form>
 
-        <div id="responseContainer" class="mt-8 hidden">
+        <!-- Container for displaying AI responses -->
+        <div id="responseContainer" class="mt-8 hidden"> <!-- Initially hidden -->
             <h2 class="text-xl font-semibold text-sky-300 mb-3">AI Response:</h2>
-            <div id="responseArea" class="p-4 bg-slate-700/50 rounded-md shadow max-h-[300px] overflow-y-auto border border-slate-600">
-                <p id="aiResponse" class="text-gray-200 whitespace-pre-wrap"></p>
+            <div id="responseArea" class="p-4 bg-slate-700/50 rounded-md shadow border border-slate-600">
+                <p id="aiResponseOutput" class="text-gray-200 whitespace-pre-wrap"></p> <!-- Output for AI response -->
             </div>
         </div>
         
-        <div id="errorContainer" class="mt-6 hidden">
+        <!-- Container for displaying error messages -->
+        <div id="errorContainer" class="mt-6 hidden"> <!-- Initially hidden -->
              <h2 class="text-lg font-semibold text-red-400 mb-2">Error:</h2>
             <div id="errorArea" class="p-4 bg-red-900/50 text-red-300 rounded-md shadow border border-red-700">
-                <p id="errorMessage"></p>
+                <p id="errorMessageOutput"></p> <!-- Output for error messages -->
             </div>
         </div>
     </div>
 
     <script>
-        const form = document.getElementById('aiForm');
-        const userInput = document.getElementById('userInput');
-        const providerSelect = document.getElementById('provider');
-        const fileUpload = document.getElementById('fileUpload');
-        
-        const responseContainer = document.getElementById('responseContainer');
-        const aiResponseOutput = document.getElementById('aiResponse'); // Changed id to avoid conflict
-        
-        const errorContainer = document.getElementById('errorContainer');
-        const errorMessageOutput = document.getElementById('errorMessage'); // Changed id
-        
-        const submitButton = document.getElementById('submitButton');
-        const submitButtonText = document.getElementById('submitButtonText');
-        const spinner = document.getElementById('spinner');
+        // --- DOM Element References ---
+        // These constants store references to various HTML elements in the document,
+        // allowing the script to interact with them (e.g., read input, display output).
+        const form = document.getElementById('aiForm');                     // The main form element
+        const userInput = document.getElementById('userInput');             // Textarea for user's prompt
+        const providerSelect = document.getElementById('provider');         // Dropdown for selecting AI provider
+        const fileUpload = document.getElementById('fileUpload');           // Input for file uploads
 
-        const API_URL = 'http://127.0.0.1:8000/api/generate'; // Backend URL
+        const responseContainer = document.getElementById('responseContainer'); // Div that holds the AI response area
+        const aiResponseOutput = document.getElementById('aiResponseOutput'); // Paragraph element to display the AI's response
 
+        const errorContainer = document.getElementById('errorContainer');       // Div that holds the error message area
+        const errorMessageOutput = document.getElementById('errorMessageOutput'); // Paragraph element to display error messages
+
+        const submitButton = document.getElementById('submitButton');           // The main submit button
+        const submitButtonText = document.getElementById('submitButtonText');   // Span inside the button to change text (e.g., "Processing...")
+        const spinner = document.getElementById('spinner');                     // Loading spinner element
+
+        // --- API Configuration ---
+        // URL of the backend API endpoint that handles the AI text generation.
+        // Ensure this points to where your FastAPI backend is running.
+        const API_URL = 'http://127.0.0.1:8000/api/generate';
+
+        // --- Event Listener for Form Submission ---
+        // This is the core function that handles what happens when the user submits the form.
         form.addEventListener('submit', async (event) => {
-            event.preventDefault();
-            
+            event.preventDefault(); // Prevent the default browser form submission (which would cause a page reload)
+
+            // --- UI State: Start Loading ---
+            // Hide any previous responses or errors.
             responseContainer.classList.add('hidden');
             errorContainer.classList.add('hidden');
+            // Show the spinner and update button text to indicate processing.
             spinner.classList.remove('hidden');
             submitButtonText.textContent = "Processing...";
+            // Disable form elements to prevent multiple submissions or changes during processing.
             submitButton.disabled = true;
             userInput.disabled = true;
             providerSelect.disabled = true;
             fileUpload.disabled = true;
 
+            // --- Prepare Form Data ---
+            // FormData is used to construct a set of key/value pairs representing form fields and their values,
+            // which is suitable for sending multipart/form-data requests (especially with file uploads).
             const formData = new FormData();
-            formData.append('provider', providerSelect.value);
-            formData.append('text', userInput.value.trim());
-            
+            formData.append('provider', providerSelect.value);          // Get selected AI provider
+            formData.append('text', userInput.value.trim());            // Get user's text input, trimmed of whitespace
+
+            // Append file if one is selected
             if (fileUpload.files.length > 0) {
-                formData.append('file', fileUpload.files[0]);
+                formData.append('file', fileUpload.files[0]); // Get the first selected file
             }
 
+            // --- API Call and Response Handling ---
             try {
+                // Make an asynchronous POST request to the backend API.
                 const response = await fetch(API_URL, {
                     method: 'POST',
-                    body: formData,
-                    // Headers are not typically needed for FormData unless for auth tokens
+                    body: formData, // FormData is sent as the request body
+                    // Headers like 'Content-Type: multipart/form-data' are automatically set by the browser when using FormData.
+                    // No explicit 'Access-Control-Allow-Origin' headers needed here; CORS is handled by the backend.
                 });
 
+                // Attempt to parse the JSON response from the server.
                 const result = await response.json();
 
+                // --- Handle API Response ---
                 if (response.ok) {
-                    aiResponseOutput.textContent = result.response;
-                    responseContainer.classList.remove('hidden');
+                    // If the HTTP response status is OK (e.g., 200), display the AI's response.
+                    aiResponseOutput.textContent = result.response || "No content received from AI."; // Display the AI's generated text
+                    responseContainer.classList.remove('hidden'); // Show the response container
                 } else {
-                    errorMessageOutput.textContent = result.detail || 'An unknown error occurred on the server.';
-                    errorContainer.classList.remove('hidden');
+                    // If the server returned an error (e.g., 4xx, 5xx), display the error message.
+                    // `result.detail` is often used by FastAPI for error messages.
+                    errorMessageOutput.textContent = result.detail || `Server error: ${response.status} ${response.statusText}. Please try again.`;
+                    errorContainer.classList.remove('hidden'); // Show the error container
                 }
             } catch (error) {
-                console.error("Fetch Error:", error);
-                errorMessageOutput.textContent = `Failed to connect to the AI service. Ensure the backend is running and accessible. Error: ${error.message}`;
-                errorContainer.classList.remove('hidden');
-            }
-            finally {
-                spinner.classList.add('hidden');
-                submitButtonText.textContent = "Send Prompt";
+                // --- Handle Network or Other Fetch Errors ---
+                // This block catches errors like network failures (e.g., backend not running, DNS issues)
+                // or issues with the fetch request itself.
+                console.error("Fetch API Error:", error); // Log the detailed error to the console for debugging
+                errorMessageOutput.textContent = `Failed to connect to the AI service. Please ensure the backend is running and accessible. (Error: ${error.message})`;
+                errorContainer.classList.remove('hidden'); // Show the error container
+            } finally {
+                // --- UI State: End Loading ---
+                // This block executes regardless of whether the try block succeeded or an error was caught.
+                // It's used to reset the UI back to its interactive state.
+                spinner.classList.add('hidden'); // Hide the spinner
+                submitButtonText.textContent = "Send Prompt"; // Reset button text
+                // Re-enable form elements
                 submitButton.disabled = false;
                 userInput.disabled = false;
                 providerSelect.disabled = false;
@@ -142,8 +196,8 @@
             }
         });
     </script>
-    <footer class="text-center mt-8 text-sm text-slate-500">
-        <p>AI Hello World Template. Use this as a starting point for your AI projects.</p>
+    <footer class="text-center mt-8 text-sm text-slate-500 px-4">
+        <p>AI Multi-Tool. A versatile interface for interacting with leading AI models. Experiment with different prompts and file inputs.</p>
     </footer>
 </body>
-</html> 
+</html>
